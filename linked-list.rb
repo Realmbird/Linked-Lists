@@ -4,110 +4,165 @@ class Node
     @value = value
     @next_node = next_node
   end
+
+  def to_s
+    "Node with value: #{@value}"
+  end
 end
 
 class LinkedList
-  def initialize(value = nil, next_node = nil)
-    @head = Node.new(@value, @next_node)
+  attr_accessor :head
+  def initialize
+    @head = nil
   end
 
-  # Traversing List
-  def loop 
-    Node temporary = @head
-    while(temporary != nil && temporary.value != nil)
-      temporary = temporary.next_node
-    end
-    temporary
-  end
   def append(value)
-    Node temporary = loop
-    temporary.next_node = Node.new(value)
+    if head.nil?
+      set_head(value)
+    else
+      temp = @head
+      # traverse list checks if next node is nil; when it is it ends the loop
+      temp = temp.next_node until temp.next_node.nil?
+      # no error just no assignment
+      temp.next_node = create_node(value)
+      # gives error temp.next_node = create_node(value)
+    end
   end
 
   def prepend(value)
-    @head = Node.new(value, @head)
-  end
-  def size
-    s = 0
-    Node temporary = @head
-    while(temporary != nil && temporary.value != nil)
-      temporary = temporary.next_node
-      s += 1
+    if head.nil?
+      set_head(value)
+    else
+      @head = Node.new(value, head)
     end
-    s
+  end
+
+  def size
+    return 0 if head.nil?
+
+    temp = @head
+    # starts at one because you need to include the first node
+    size = 1
+    until temp.next_node.nil?
+      size += 1
+      temp = temp.next_node
+    end
+    size
+  end
+
+  def create_node(value = nil, next_node = nil)
+    Node.new(value, next_node)
+  end
+
+  def set_head(value)
+    self.head = create_node(value)
   end
 
   def tail
-    loop
+    temp = @head
+    temp = temp.next_node until temp.next_node.nil?
+    temp
   end
 
   def at(index)
-    Node temporary = @head
-    i = 0
-    while(temporary != nil && temporary.value != nil && i < index)
-      temporary = temporary.next_node
-      i += 1
-      s += 1
-    end
-    temporary
-  end
+    return head if index.zero?
 
-  def pop
-    Node temporary = @head
-    while(temporary != nil && temporary.value != nil)
-      prev = temporary
-      temporary = temporary.next_node
+    temp = @head
+    i = 0
+    until temp.next_node.nil?
+      temp = temp.next_node
+      i += 1
+      return temp if index == i
     end
-    prev.next_node = nil
+    nil
   end
 
   def contains?(value)
-    contain = false
-    Node temporary = @head
-    while(temporary != nil && temporary.value != nil)
-      if(temporary.value == value)
-        contain = true
-      end
-      temporary = temporary.next_node
+    temp = @head
+    until temp.next_node.nil?
+      return true if temp.value == value
+
+      temp = temp.next_node
     end
-    contain
+    false
   end
 
   def find(value)
-    Node temporary = @head
-    i = 0
-    while(temporary != nil && temporary.value != nil)
-      
-      if(temporary.value == value)
-        return i
-      end
-      i += 1
-      temporary = temporary.next_node
-    end
-    return nil
-  end
+    return nil unless contains?(value)
 
-  def to_s
-    string = ""
-    Node temporary = @head
-    while(temporary != nil && temporary.value != nil)
-      string += "#{temporary.value} ->"
-      temporary = temporary.next_node
-    end
-    string += "#{nil}"
-    return string
-  end
+    index = 0
+    temp = @head
+    until temp.next_node.nil?
+      return index if temp.value == value
 
-  # Extra Credit
+      index += 1
+      temp = temp.next_node
+    end
+  end
 
   def insert_at(value, index)
+    return prepend(value) if index.zero?
 
+    temp = at(index - 1)
+    return 'invalid' if temp.nil?
+
+    temp.next_node = Node.new(value, at(index))
   end
 
   def remove_at(index)
+    return @head = @head.next_node if index.zero?
 
+    temp = at(index - 1)
+    return temp.next_node = nil if at(index) == tail
+
+    temp.next_node = at(index + 1)
+  end
+
+  def pop
+    temp = @head
+    temp = temp.next_node until temp.next_node == tail
+    temp.next_node = nil
+  end
+
+  def to_s
+    if head.nil?
+      puts 'No linked list'
+    else
+      temp = head
+      list = ''
+      # traverse list
+      until temp.nil?
+        list += "(#{temp.value}) -> "
+        temp = temp.next_node
+      end
+      list += 'nil'
+      list
+    end
   end
 end
 
-link = LinkedList.new(5)
+link = LinkedList.new
+link.append('test1')
+link.append('test2')
+link.append('test3')
+p link.to_s
+link.prepend('hi')
+p link.to_s
+puts link.size
+puts link.head
+puts link.tail
+puts link.at(2)
+puts link.pop
+puts link.to_s
+puts link.contains?('test1')
+puts link.find('test1')
+link.insert_at('test3', 2)
+link.insert_at('test4', 1)
+link.insert_at('test5', 0)
+puts link.to_s
+link.remove_at(0)
+puts link.to_s
+link.remove_at(2)
+puts link.to_s
+link.remove_at(3)
 puts link.to_s
